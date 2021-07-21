@@ -7,7 +7,7 @@ var Keys={
 };
 var canvas=document.getElementById("gameArea");
 var context=canvas.getContext("2d");
-var Interval,arrowInterval=500,nowarrowInterval=0;
+var Interval,arrowInterval=500,nowarrowInterval=-4500;
 var nowTime,deltaTime=0,stackTime=5000;
 var keypressed=false,nowPressedKey;
 var Arrows=new Array();
@@ -54,6 +54,12 @@ var Core={
 function startGame(){
     nowTime=new Date().getTime();
     Interval = setInterval(Update,20);
+    start_generator=setInterval(function(){
+        generate_arrow();
+        if(Arrows.length>=10){
+           clearInterval(start_generator);
+        }
+    },500);
 }
 function Update(){
     
@@ -100,6 +106,7 @@ function defend(){
 }
 function gameover(){
     console.log("game over!");
+    defend();
 }
 function keydown(event){
     for(let dir in Directions){
