@@ -10,7 +10,38 @@ var context=canvas.getContext("2d");
 var Interval,arrowInterval=500,nowarrowInterval=0;
 var nowTime,deltaTime=0,stackTime=3000;
 var keypressed=false,nowPressedKey;
-var Arrows=new Array();
+var Arrows={
+    pointer:0,
+    last:0,
+    length:0,
+    data:new Array(50),
+    push:function(d){
+        this.data[this.last]=d;
+        this.last++;
+        this.length++;
+    },
+    shift:function(){
+        this.length--;
+        delete this.data[this.last];
+        this.increase_pointer();
+    },
+    first:function(){
+        return this.data[this.pointer];
+    },
+    increase_pointer:function(){
+        this.pointer++;
+        if(this.pointer>50){
+            this.pointer=0;
+        }
+    },
+    update:function(){
+        for(let k=this.pointer;k!=this.last;k++){
+            if(k>50)k=0;
+            Arrows.data[k].update();
+        }
+    }
+
+};
 function images(){
     for(let dir in Directions){
         this["image_core_"+Directions[dir]]=new Image();
@@ -78,25 +109,23 @@ function Update(){
 
     context.clearRect(0,0,canvas.width,canvas.height);
     Core.update();
-    for(let arr in Arrows){
-        Arrows[arr].update();
-    }
+    Arrows.update();
 }
-function collide(){
-    let arrow=Arrows[0];
+function collide(arrow){
     if(arrow==null){
-        defend();
+        Arrows.shift();
         return;
     }
 
     if(Directions[arrow.direction]==Core.state){
-        defend();
+        defend(arrow);
     }else{
         gameover();
     }
 }
-function defend(){
-    delete Arrows[0];
+function defend(arrow){
+    if(arrow==null)return;
+    createParticle(arrow.posX,arrow.posY);
     Arrows.shift();
 }
 function gameover(){
@@ -128,7 +157,7 @@ function Arrow(type,direction,speed){
     this.type=type;
     this.direction=direction;
     this.speed=speed;
-    this.scale=180;
+    this.scale=60;
     
     this.delta=this.speed*stackTime;
     switch(this.direction){
@@ -167,15 +196,15 @@ function Arrow(type,direction,speed){
                 this.posX-=change;
                 break;
         }
-        if(this.delta<=0){
-            collide();
+        if(this.delta<=75){
+            collide(this);
         }
 
         drawObject("image_arrow_"+this.type+'_'+this.direction,this.posX,this.posY,this.scale);
     }
 }
 function generate_arrow(){
-    Arrows.push( new Arrow(0,randint(4),Math.random()*0.5+0.25));
+    Arrows.push( new Arrow(0,randint(4),Math.random()*0.25+0.15));
 }
 function randint(n){
     return Math.floor(Math.random()*n);
