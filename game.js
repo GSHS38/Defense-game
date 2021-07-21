@@ -7,8 +7,8 @@ var Keys={
 };
 var canvas=document.getElementById("gameArea");
 var context=canvas.getContext("2d");
-var Interval,arrowInterval=500,nowarrowInterval=-4500;
-var nowTime,deltaTime=0,stackTime=5000;
+var Interval,arrowInterval=500,nowarrowInterval=0;
+var nowTime,deltaTime=0,stackTime=3000;
 var keypressed=false,nowPressedKey;
 var Arrows=new Array();
 function images(){
@@ -35,8 +35,8 @@ var Images=new images();
 
 var Core={
     state:"UP",
-    scale:100,
-    scaleTo:100,
+    scale:150,
+    scaleTo:150,
     scaleChange:0,
     update: function(){
         if(this.scaleChange!=0)
@@ -54,12 +54,7 @@ var Core={
 function startGame(){
     nowTime=new Date().getTime();
     Interval = setInterval(Update,20);
-    start_generator=setInterval(function(){
-        generate_arrow();
-        if(Arrows.length>=10){
-           clearInterval(start_generator);
-        }
-    },500);
+    
 }
 function Update(){
     
@@ -68,16 +63,16 @@ function Update(){
     deltaTime=nowTime-lastTime;
     
     if(keypressed){
-        Core.scaleTo=115;
+        Core.scaleTo=180;
         Core.scaleChange=1;
     }else{
-        Core.scaleTo=100;
+        Core.scaleTo=150;
         Core.scaleChange=-1;
     }
     
     nowarrowInterval+=deltaTime;
     if(nowarrowInterval>=arrowInterval){
-        collide(Arrows[0]);
+        generate_arrow();
         nowarrowInterval=0;
     }
 
@@ -87,7 +82,8 @@ function Update(){
         Arrows[arr].update();
     }
 }
-function collide(arrow){
+function collide(){
+    let arrow=Arrows[0];
     if(arrow==null){
         defend();
         return;
@@ -102,10 +98,9 @@ function collide(arrow){
 function defend(){
     delete Arrows[0];
     Arrows.shift();
-    generate_arrow();
 }
 function gameover(){
-    console.log("game over!");
+    clearInterval(Interval);
     defend();
 }
 function keydown(event){
@@ -133,30 +128,31 @@ function Arrow(type,direction,speed){
     this.type=type;
     this.direction=direction;
     this.speed=speed;
-    this.scale=100;
+    this.scale=180;
     
-    let delta=this.speed*stackTime;
+    this.delta=this.speed*stackTime;
     switch(this.direction){
         case 0:
             this.posX=canvas.width/2;
-            this.posY=canvas.height/2-delta;
+            this.posY=canvas.height/2-this.delta;
             break;
         case 1:
             this.posX=canvas.width/2;
-            this.posY=canvas.height/2+delta;
+            this.posY=canvas.height/2+this.delta;
             break;
         case 2:
-            this.posX=canvas.width/2-delta;
+            this.posX=canvas.width/2-this.delta;
             this.posY=canvas.height/2;
             break;
         case 3:
-            this.posX=canvas.width/2+delta;
+            this.posX=canvas.width/2+this.delta;
             this.posY=canvas.height/2;
             break;
                                 
     }
     this.update=function(){
         let change=deltaTime*this.speed;
+        this.delta-=change;
         switch(this.direction){
             case 0:
                 this.posY+=change;
@@ -171,11 +167,14 @@ function Arrow(type,direction,speed){
                 this.posX-=change;
                 break;
         }
+        if(this.delta<=0){
+            collide();
+        }
+
         drawObject("image_arrow_"+this.type+'_'+this.direction,this.posX,this.posY,this.scale);
     }
 }
 function generate_arrow(){
-    console.log(randint(1)); //TODO randint(2)
     Arrows.push( new Arrow(0,randint(4),Math.random()*0.5+0.25));
 }
 function randint(n){
