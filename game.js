@@ -14,30 +14,37 @@ var Arrows={
     pointer:0,
     last:0,
     length:0,
-    data:new Array(50),
+    data:new Array(10),
     push:function(d){
         this.data[this.last]=d;
         this.last++;
+        if(this.last>=10){
+            this.last=0;
+        }
         this.length++;
     },
     shift:function(){
         this.length--;
         delete this.data[this.last];
         this.increase_pointer();
+        console.log(this);
     },
     first:function(){
         return this.data[this.pointer];
     },
     increase_pointer:function(){
         this.pointer++;
-        if(this.pointer>50){
+        if(this.pointer>=10){
+            
             this.pointer=0;
         }
     },
     update:function(){
         for(let k=this.pointer;k!=this.last;k++){
-            if(k>50)k=0;
-            Arrows.data[k].update();
+            if(k>=10){
+                k=0;
+            }
+            this.data[k].update();
         }
     }
 
@@ -207,5 +214,6 @@ function generate_arrow(){
     Arrows.push( new Arrow(0,randint(4),Math.random()*0.25+0.15));
 }
 function randint(n){
+    return 0;
     return Math.floor(Math.random()*n);
 }
