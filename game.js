@@ -11,40 +11,31 @@ var Interval,arrowInterval=500,nowarrowInterval=0;
 var nowTime,deltaTime=0,stackTime=3000;
 var keypressed=false,nowPressedKey;
 var Arrows={
-    pointer:0,
+    first:0,
     last:0,
-    length:0,
     data:new Array(10),
     push:function(d){
         this.data[this.last]=d;
         this.last++;
-        if(this.last>=10){
-            this.last=0;
-        }
-        this.length++;
+        if(this.last>=10) this.last=0;
     },
     shift:function(){
-        this.length--;
-        delete this.data[this.last];
-        this.increase_pointer();
-        console.log(this);
+        // delete this.data[this.first];
+        this.first++;
+        if(this.first>=10) this.first=0;
     },
-    first:function(){
-        return this.data[this.pointer];
-    },
-    increase_pointer:function(){
-        this.pointer++;
-        if(this.pointer>=10){
-            
-            this.pointer=0;
-        }
+    pointer:function(){
+        return this.data[this.first];
     },
     update:function(){
-        for(let k=this.pointer;k!=this.last;k++){
-            if(k>=10){
-                k=0;
+        for(let i=this.first;;i++){
+            // console.log("now updating "+i);
+            if(i>=10)i=0;
+            if(i==this.last){
+                break;
             }
-            this.data[k].update();
+            this.data[i].update();
+            
         }
     }
 
@@ -214,6 +205,6 @@ function generate_arrow(){
     Arrows.push( new Arrow(0,randint(4),Math.random()*0.25+0.15));
 }
 function randint(n){
-    return 0;
+    
     return Math.floor(Math.random()*n);
 }
